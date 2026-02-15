@@ -419,18 +419,18 @@ chmod +x passive_subdomains.sh
 ├─────────────────┬───────────────────────────────────────────────┤
 │    Operator     │                 Description                   │
 ├─────────────────┼───────────────────────────────────────────────┤
-│ site:          │ Restrict results to specific domain            │
-│ inurl:         │ Search for keyword in URL                      │
-│ intitle:       │ Search for keyword in page title               │
-│ intext:        │ Search for keyword in page content             │
-│ filetype:      │ Search for specific file types                 │
-│ ext:           │ Same as filetype                               │
-│ cache:         │ View Google's cached version                   │
-│ -keyword       │ Exclude keyword from results                   │
-│ "exact phrase" │ Search for exact phrase                        │
-│ *              │ Wildcard                                       │
-│ OR             │ Boolean OR                                     │
-│ |              │ Same as OR                                     │
+│ site:           │ Restrict results to specific domain           │
+│ inurl:          │ Search for keyword in URL                     │
+│ intitle:        │ Search for keyword in page title              │
+│ intext:         │ Search for keyword in page content            │
+│ filetype:       │ Search for specific file types                │
+│ ext:            │ Same as filetype                              │
+│ cache:          │ View Google's cached version                  │
+│ -keyword        │ Exclude keyword from results                  │
+│ "exact phrase"  │ Search for exact phrase                       │
+│ *               │ Wildcard                                      │
+│ OR              │ Boolean OR                                    │
+│ |               │ Same as OR                                    │
 └─────────────────┴───────────────────────────────────────────────┘
 ```
 
@@ -789,8 +789,8 @@ python3 GitDorker.py -tf GITHUB_TOKEN -q "org:target-company" -d dorks/alldorksv
 ```bash
 
     ┌─────────────────┐
-    │   Company Name   │
-    │   (e.g., Tesla)  │
+    │   Company Name  │
+    │   (e.g., Tesla) │
     └────────┬────────┘
              │
              ▼
@@ -1624,12 +1624,12 @@ echo -e "${BLUE}"
 echo "╔════════════════════════════════════════════════════════════╗"
 echo "║                    RECON SUMMARY                           ║"
 echo "╠════════════════════════════════════════════════════════════╣"
-echo "║  Subdomains Found: $(wc -l < $PASSIVE_DIR/all_subdomains.txt)                                    "
-echo "║  URLs Found: $(wc -l < $PASSIVE_DIR/all_urls.txt)                                          "
-echo "║  JS Files: $(wc -l < $URLS_DIR/js_files.txt)                                            "
-echo "║  Potential LFI: $(wc -l < $URLS_DIR/potential_lfi.txt)                                       "
-echo "║  Potential SSRF: $(wc -l < $URLS_DIR/potential_ssrf.txt)                                      "
-echo "║  API Endpoints: $(wc -l < $URLS_DIR/api_endpoints.txt)                                        "
+echo "║  Subdomains Found: $(wc -l < $PASSIVE_DIR/all_subdomains.txt)"
+echo "║  URLs Found: $(wc -l < $PASSIVE_DIR/all_urls.txt)"
+echo "║  JS Files: $(wc -l < $URLS_DIR/js_files.txt)"
+echo "║  Potential LFI: $(wc -l < $URLS_DIR/potential_lfi.txt)"
+echo "║  Potential SSRF: $(wc -l < $URLS_DIR/potential_ssrf.txt)"
+echo "║  API Endpoints: $(wc -l < $URLS_DIR/api_endpoints.txt)"
 echo "╠════════════════════════════════════════════════════════════╣"
 echo "║  Results saved to: $BASE_DIR                               "
 echo "╚════════════════════════════════════════════════════════════╝"
@@ -1704,7 +1704,7 @@ target.com/
 ```bash
 subfinder	Subdomain enum	go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 assetfinder	Subdomain enum	go install github.com/tomnomnom/assetfinder@latest
-amass	Subdomain enum	go install github.com/owasp-amass/amass/v4/...@master
+amass	Subdomain enum	go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
 waybackurls	URL mining	go install github.com/tomnomnom/waybackurls@latest
 gau	URL mining	go install github.com/lc/gau/v2/cmd/gau@latest
 httpx	HTTP probing	go install github.com/projectdiscovery/httpx/cmd/httpx@latest
