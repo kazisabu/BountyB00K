@@ -1,4 +1,4 @@
-## 📘 Passive Reconnaissance Masterclass
+## 📘 Passive Reconnaissance For Web-Application
 #### Bug Bounty Recon - Class 1: Foundation Layer
 
 ## Module 1: Introduction to Passive Recon
