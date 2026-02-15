@@ -271,7 +271,7 @@ VirusTotal	    https://virustotal.com/gui/join-us	     500 requests/day
 Chaos	        https://chaos.projectdiscovery.io	     Free (ProjectDiscovery)
 GitHub	        Personal Access Token	                 Unlimited
 ```
-2.4 Tool #3: Assetfinder
+### 2.4 Tool #3: Assetfinder
 ```Bash
 
 # Installation
