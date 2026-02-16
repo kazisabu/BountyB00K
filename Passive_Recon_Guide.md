@@ -1526,8 +1526,25 @@ NC='\033[0m' # No Color
 
 DOMAIN=$1
 
+# Check if domain provided
 if [ -z "$DOMAIN" ]; then
     echo -e "${RED}Usage: $0 <domain>${NC}"
+    exit 1
+fi
+
+# Check required tools
+REQUIRED_TOOLS=("curl" "jq" "subfinder" "assetfinder" "amass" "waybackurls" "gau")
+MISSING_TOOLS=()
+
+for tool in "${REQUIRED_TOOLS[@]}"; do
+    if ! command -v $tool &> /dev/null; then
+        MISSING_TOOLS+=($tool)
+    fi
+done
+
+if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
+    echo -e "${RED}[!] Missing required tools: ${MISSING_TOOLS[*]}${NC}"
+    echo -e "${YELLOW}[*] Install them and try again${NC}"
     exit 1
 fi
 
@@ -1538,7 +1555,7 @@ SUBDOMAINS_DIR="$PASSIVE_DIR/subdomains"
 URLS_DIR="$PASSIVE_DIR/urls"
 DORKING_DIR="$PASSIVE_DIR/dorking"
 
-mkdir -p $SUBDOMAINS_DIR $URLS_DIR $DORKING_DIR
+mkdir -p "$SUBDOMAINS_DIR" "$URLS_DIR" "$DORKING_DIR"
 
 echo -e "${BLUE}"
 echo "╔════════════════════════════════════════════════════════════╗"
@@ -1554,31 +1571,48 @@ echo -e "${YELLOW}[PHASE 1] Subdomain Enumeration${NC}"
 
 # 1.1 crt.sh
 echo -e "${GREEN}[+] Querying crt.sh...${NC}"
-curl -s "https://crt.sh/?q=%.$DOMAIN&output=json" | \
+if curl -s "https://crt.sh/?q=%.$DOMAIN&output=json" | \
     jq -r '.[].name_value' 2>/dev/null | \
     sed 's/\*\.//g' | \
-    sort -u > $SUBDOMAINS_DIR/crt_sh.txt
-echo "    Found: $(wc -l < $SUBDOMAINS_DIR/crt_sh.txt) subdomains"
+    sort -u > "$SUBDOMAINS_DIR/crt_sh.txt"; then
+    echo "    Found: $(wc -l < "$SUBDOMAINS_DIR/crt_sh.txt" 2>/dev/null || echo 0) subdomains"
+else
+    echo -e "${RED}    [!] crt.sh query failed${NC}"
+    touch "$SUBDOMAINS_DIR/crt_sh.txt"
+fi
 
 # 1.2 Subfinder
 echo -e "${GREEN}[+] Running Subfinder...${NC}"
-subfinder -d $DOMAIN -silent -o $SUBDOMAINS_DIR/subfinder.txt 2>/dev/null
-echo "    Found: $(wc -l < $SUBDOMAINS_DIR/subfinder.txt) subdomains"
+if subfinder -d "$DOMAIN" -silent -o "$SUBDOMAINS_DIR/subfinder.txt" 2>/dev/null; then
+    echo "    Found: $(wc -l < "$SUBDOMAINS_DIR/subfinder.txt" 2>/dev/null || echo 0) subdomains"
+else
+    echo -e "${RED}    [!] Subfinder failed${NC}"
+    touch "$SUBDOMAINS_DIR/subfinder.txt"
+fi
 
 # 1.3 Assetfinder
 echo -e "${GREEN}[+] Running Assetfinder...${NC}"
-assetfinder --subs-only $DOMAIN > $SUBDOMAINS_DIR/assetfinder.txt 2>/dev/null
-echo "    Found: $(wc -l < $SUBDOMAINS_DIR/assetfinder.txt) subdomains"
+if assetfinder --subs-only "$DOMAIN" > "$SUBDOMAINS_DIR/assetfinder.txt" 2>/dev/null; then
+    echo "    Found: $(wc -l < "$SUBDOMAINS_DIR/assetfinder.txt" 2>/dev/null || echo 0) subdomains"
+else
+    echo -e "${RED}    [!] Assetfinder failed${NC}"
+    touch "$SUBDOMAINS_DIR/assetfinder.txt"
+fi
 
 # 1.4 Amass Passive
 echo -e "${GREEN}[+] Running Amass (passive mode)...${NC}"
-timeout 300 amass enum -passive -d $DOMAIN -o $SUBDOMAINS_DIR/amass.txt 2>/dev/null
-echo "    Found: $(wc -l < $SUBDOMAINS_DIR/amass.txt 2>/dev/null || echo 0) subdomains"
+if timeout 300 amass enum -passive -d "$DOMAIN" -o "$SUBDOMAINS_DIR/amass.txt" 2>/dev/null || [ -f "$SUBDOMAINS_DIR/amass.txt" ]; then
+    echo "    Found: $(wc -l < "$SUBDOMAINS_DIR/amass.txt" 2>/dev/null || echo 0) subdomains"
+else
+    echo -e "${RED}    [!] Amass failed or timed out${NC}"
+    touch "$SUBDOMAINS_DIR/amass.txt"
+fi
 
 # Merge all subdomains
 echo -e "${GREEN}[+] Merging subdomain results...${NC}"
-cat $SUBDOMAINS_DIR/*.txt | sort -u > $PASSIVE_DIR/all_subdomains.txt
-echo -e "${BLUE}    TOTAL UNIQUE SUBDOMAINS: $(wc -l < $PASSIVE_DIR/all_subdomains.txt)${NC}"
+cat "$SUBDOMAINS_DIR"/*.txt 2>/dev/null | sort -u > "$PASSIVE_DIR/all_subdomains.txt"
+TOTAL_SUBS=$(wc -l < "$PASSIVE_DIR/all_subdomains.txt" 2>/dev/null || echo 0)
+echo -e "${BLUE}    TOTAL UNIQUE SUBDOMAINS: $TOTAL_SUBS${NC}"
 
 #------------------------------------------------------------
 # PHASE 2: HISTORICAL URL DATA
@@ -1588,36 +1622,49 @@ echo -e "${YELLOW}[PHASE 2] Historical URL Mining${NC}"
 
 # 2.1 Waybackurls
 echo -e "${GREEN}[+] Fetching Wayback URLs...${NC}"
-echo $DOMAIN | waybackurls > $URLS_DIR/wayback_urls.txt 2>/dev/null
-echo "    Found: $(wc -l < $URLS_DIR/wayback_urls.txt) URLs"
+if echo "$DOMAIN" | waybackurls > "$URLS_DIR/wayback_urls.txt" 2>/dev/null; then
+    echo "    Found: $(wc -l < "$URLS_DIR/wayback_urls.txt" 2>/dev/null || echo 0) URLs"
+else
+    echo -e "${RED}    [!] Waybackurls failed${NC}"
+    touch "$URLS_DIR/wayback_urls.txt"
+fi
 
 # 2.2 GAU
 echo -e "${GREEN}[+] Running GAU...${NC}"
-gau $DOMAIN > $URLS_DIR/gau_urls.txt 2>/dev/null
-echo "    Found: $(wc -l < $URLS_DIR/gau_urls.txt) URLs"
+if gau "$DOMAIN" > "$URLS_DIR/gau_urls.txt" 2>/dev/null; then
+    echo "    Found: $(wc -l < "$URLS_DIR/gau_urls.txt" 2>/dev/null || echo 0) URLs"
+else
+    echo -e "${RED}    [!] GAU failed${NC}"
+    touch "$URLS_DIR/gau_urls.txt"
+fi
 
 # Merge URLs
-cat $URLS_DIR/*.txt | sort -u > $PASSIVE_DIR/all_urls.txt
-echo -e "${BLUE}    TOTAL UNIQUE URLs: $(wc -l < $PASSIVE_DIR/all_urls.txt)${NC}"
+cat "$URLS_DIR"/*.txt 2>/dev/null | sort -u > "$PASSIVE_DIR/all_urls.txt"
+TOTAL_URLS=$(wc -l < "$PASSIVE_DIR/all_urls.txt" 2>/dev/null || echo 0)
+echo -e "${BLUE}    TOTAL UNIQUE URLs: $TOTAL_URLS${NC}"
 
 # Filter interesting endpoints
 echo -e "${GREEN}[+] Filtering interesting endpoints...${NC}"
 
 # JS Files
-grep -E "\.js(\?|$)" $PASSIVE_DIR/all_urls.txt | sort -u > $URLS_DIR/js_files.txt
-echo "    JS files: $(wc -l < $URLS_DIR/js_files.txt)"
+grep -E "\.js(\?|$)" "$PASSIVE_DIR/all_urls.txt" 2>/dev/null | sort -u > "$URLS_DIR/js_files.txt"
+JS_COUNT=$(wc -l < "$URLS_DIR/js_files.txt" 2>/dev/null || echo 0)
+echo "    JS files: $JS_COUNT"
 
 # Potential LFI
-grep -E "(file|path|folder|doc|root|include)=" $PASSIVE_DIR/all_urls.txt | sort -u > $URLS_DIR/potential_lfi.txt
-echo "    Potential LFI: $(wc -l < $URLS_DIR/potential_lfi.txt)"
+grep -E "(file|path|folder|doc|root|include)=" "$PASSIVE_DIR/all_urls.txt" 2>/dev/null | sort -u > "$URLS_DIR/potential_lfi.txt"
+LFI_COUNT=$(wc -l < "$URLS_DIR/potential_lfi.txt" 2>/dev/null || echo 0)
+echo "    Potential LFI: $LFI_COUNT"
 
 # Potential SSRF
-grep -E "(url|redirect|return|next|dest|src|link)=" $PASSIVE_DIR/all_urls.txt | sort -u > $URLS_DIR/potential_ssrf.txt
-echo "    Potential SSRF: $(wc -l < $URLS_DIR/potential_ssrf.txt)"
+grep -E "(url|redirect|return|next|dest|src|link)=" "$PASSIVE_DIR/all_urls.txt" 2>/dev/null | sort -u > "$URLS_DIR/potential_ssrf.txt"
+SSRF_COUNT=$(wc -l < "$URLS_DIR/potential_ssrf.txt" 2>/dev/null || echo 0)
+echo "    Potential SSRF: $SSRF_COUNT"
 
 # API endpoints
-grep -E "/api/" $PASSIVE_DIR/all_urls.txt | sort -u > $URLS_DIR/api_endpoints.txt
-echo "    API endpoints: $(wc -l < $URLS_DIR/api_endpoints.txt)"
+grep -E "/api/" "$PASSIVE_DIR/all_urls.txt" 2>/dev/null | sort -u > "$URLS_DIR/api_endpoints.txt"
+API_COUNT=$(wc -l < "$URLS_DIR/api_endpoints.txt" 2>/dev/null || echo 0)
+echo "    API endpoints: $API_COUNT"
 
 #------------------------------------------------------------
 # PHASE 3: SUMMARY
@@ -1627,14 +1674,14 @@ echo -e "${BLUE}"
 echo "╔════════════════════════════════════════════════════════════╗"
 echo "║                    RECON SUMMARY                           ║"
 echo "╠════════════════════════════════════════════════════════════╣"
-echo "║  Subdomains Found: $(wc -l < $PASSIVE_DIR/all_subdomains.txt)"
-echo "║  URLs Found: $(wc -l < $PASSIVE_DIR/all_urls.txt)"
-echo "║  JS Files: $(wc -l < $URLS_DIR/js_files.txt)"
-echo "║  Potential LFI: $(wc -l < $URLS_DIR/potential_lfi.txt)"
-echo "║  Potential SSRF: $(wc -l < $URLS_DIR/potential_ssrf.txt)"
-echo "║  API Endpoints: $(wc -l < $URLS_DIR/api_endpoints.txt)"
+printf "║  %-40s %15s  ║\n" "Subdomains Found:" "$TOTAL_SUBS"
+printf "║  %-40s %15s  ║\n" "URLs Found:" "$TOTAL_URLS"
+printf "║  %-40s %15s  ║\n" "JS Files:" "$JS_COUNT"
+printf "║  %-40s %15s  ║\n" "Potential LFI:" "$LFI_COUNT"
+printf "║  %-40s %15s  ║\n" "Potential SSRF:" "$SSRF_COUNT"
+printf "║  %-40s %15s  ║\n" "API Endpoints:" "$API_COUNT"
 echo "╠════════════════════════════════════════════════════════════╣"
-echo "║  Results saved to: $BASE_DIR                               "
+printf "║  Results saved to: %-35s ║\n" "$BASE_DIR"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 ```
