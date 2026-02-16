@@ -1751,15 +1751,15 @@ target.com/
 ## 📚 Additional Resources
 #### Recommended Tools Summary
 #### Tool	Purpose	Installation
-```bash
-subfinder	Subdomain enum	go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
-assetfinder	Subdomain enum	go install github.com/tomnomnom/assetfinder@latest
-amass	Subdomain enum	go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
-waybackurls	URL mining	go install github.com/tomnomnom/waybackurls@latest
-gau	URL mining	go install github.com/lc/gau/v2/cmd/gau@latest
-httpx	HTTP probing	go install github.com/projectdiscovery/httpx/cmd/httpx@latest
-shodan	Passive scanning	pip install shodan
-```
+
+subfinder	Subdomain enum	  `go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest`
+assetfinder	Subdomain enum	`go install github.com/tomnomnom/assetfinder@latest`
+amass	Subdomain enum	`go install -v github.com/owasp-amass/amass/v5/cmd/amass@main`
+waybackurls	URL mining	`go install github.com/tomnomnom/waybackurls@latest`
+gau	URL mining	`go install github.com/lc/gau/v2/cmd/gau@latest`
+httpx	HTTP probing	`go install github.com/projectdiscovery/httpx/cmd/httpx@latest`
+shodan	Passive scanning	`pip install shodan`
+
 #### Recommended Learning
 ```bash
 ┌─────────────────────────────────────────────────────────────────┐
