@@ -303,7 +303,7 @@ assetfinder --subs-only example.com > assetfinder_subs.txt
 ```Bash
 
 # Installation
-go install -v github.com/owasp-amass/amass/v4/...@master
+go install -v github.com/owasp-amass/amass/v5/cmd/amass@main
 
 # Passive enumeration only
 amass enum -passive -d example.com -o amass_subs.txt
@@ -949,6 +949,9 @@ What is Wayback Machine?
 ```
 ## 💻 Tools for Wayback Mining:
 ```Bash
+#Web Based Url:
+
+http://web.archive.org/cdx/search/cdx?url=DOMAIN/*&output=text&fl=original&collapse=urlkey
 
 # Tool 1: waybackurls (by tomnomnom)
 go install github.com/tomnomnom/waybackurls@latest
