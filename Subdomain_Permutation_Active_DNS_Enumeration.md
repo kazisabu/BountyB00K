@@ -25,7 +25,7 @@ Resolution chain:
   Answer returns up the chain
   Your machine receives: 10.20.30.40 or NXDOMAIN
 ```
-### Version:
+### Visual:
 
 `https://miro.com/welcomeonboard/b3lBOGthTzRYVitSZXJqbERnVXZDdmJMWG5acnFiR1JQeWgrRFV4RXpmV3RyTFFmRUdvMXcwNEF1dXlrZTdHRkNaNGIxSFB4SHYyZXNlYlJzRjVpb09FdjJXRlk1WDNsMjRZZUlpQWxWaUVzS1poeFM1MUVOL2ZzZXFaVTlpTDFzVXVvMm53MW9OWFg5bkJoVXZxdFhRPT0hdjE=?share_link_id=143750809510`
 
